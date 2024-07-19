@@ -121,7 +121,31 @@ void free_memory(void* ptr) {
     if (ptr == NULL) return;
 
     BlockHeader* block = (BlockHeader*)((char*)ptr - BLOCK_HEADER_SIZE);
-    block->next = free_list;
-    free_list = block;
 
+    // Add block to free list in sorted order
+    BlockHeader* prev = NULL;
+    BlockHeader* curr = free_list;
+
+    while (curr != NULL && curr < block) {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    // Coalesce adjacent blocks
+    if (prev != NULL && (char*)prev + BLOCK_HEADER_SIZE + prev->size == (char*)block) {
+        prev->size += BLOCK_HEADER_SIZE + block->size;
+        block = prev;
+    } else {
+        block->next = curr;
+        if (prev != NULL) {
+            prev->next = block;
+        } else {
+            free_list = block;
+        }
+    }
+
+    if (curr != NULL && (char*)block + BLOCK_HEADER_SIZE + block->size == (char*)curr) {
+        block->size += BLOCK_HEADER_SIZE + curr->size;
+        block->next = curr->next;
+    }
 }

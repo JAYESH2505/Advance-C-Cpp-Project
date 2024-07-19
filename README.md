@@ -41,3 +41,9 @@ To manage memory blocks efficiently, we need to add some metadata to each alloca
 
 * Update the Free Function:
 The free_memory function will mark the block as free and, for simplicity, we'll assume it can merge contiguous free blocks (though a more advanced allocator would handle this more robustly).
+
+Step 4: Implementing Coalescing and Enhancing Error Handling
+Objective:
+
+* Implement coalescing of adjacent free blocks to reduce fragmentation.
+* Add error handling for scenarios like double-free and invalid free.
