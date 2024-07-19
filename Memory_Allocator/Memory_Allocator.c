@@ -50,6 +50,7 @@ void destroy_memory_pool() {
 //! Function Prototypes:
 void* allocate_memory(size_t size);
 void free_memory(void* ptr);
+void* realloc_memory(void* ptr,size_t size);
 
 int main(int argc, char* argv[]) {
     initialize_memory_pool();
@@ -63,8 +64,18 @@ int main(int argc, char* argv[]) {
         printf("Failed\n");
     }
 
+    // Reallocate memory
+    a = (double*)realloc_memory(a, 2 * sizeof(double)); // Reallocating to double the size.
+    if (a != NULL) {
+        a[1] = 84;
+        printf("Memory reallocated successfully %f %f\n", a[0], a[1]);
+    } else {
+        printf("Reallocation Failed\n");
+    }
+
     // Free the double
     free_memory(a);
+    a = NULL; // Avoid dangling pointer
 
     // Use Memory pool...
     int* b = (int*)allocate_memory(sizeof(int)); // Allocating an int (4 bytes).
@@ -77,6 +88,7 @@ int main(int argc, char* argv[]) {
 
     // Free the int
     free_memory(b);
+    b = NULL; // Avoid dangling pointer
 
     // Clean up the memory pool
     destroy_memory_pool();
@@ -148,4 +160,30 @@ void free_memory(void* ptr) {
         block->size += BLOCK_HEADER_SIZE + curr->size;
         block->next = curr->next;
     }
+}
+
+
+void* realloc_memory(void* ptr,size_t size){
+    if(ptr==NULL)
+        return allocate_memory(size);
+
+    if(!size)
+        return NULL;
+    
+    BlockHeader* block=(char*)ptr-BLOCK_HEADER_SIZE;
+
+    if(block->size>=size)
+        return ptr; // The Current Block is Already Large Enough.
+
+    void *nptr=allocate_memory(size);
+
+    if(nptr==NULL)
+        return NULL; // Allocation Failed.
+    
+    //Copy old data to new block
+    memcpy(nptr,ptr,block->size);
+    free_memory(ptr); // Free the old Block.
+
+    return nptr;
+
 }

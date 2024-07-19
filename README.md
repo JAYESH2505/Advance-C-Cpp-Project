@@ -47,3 +47,5 @@ Objective:
 
 * Implement coalescing of adjacent free blocks to reduce fragmentation.
 * Add error handling for scenarios like double-free and invalid free.
+
+Step 5: Implementing a Realloc Function.
